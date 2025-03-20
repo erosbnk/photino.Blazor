@@ -8,10 +8,8 @@ public partial class PhotinoBlazorApp(IHost host)
 
     public IHostEnvironment Environment => Services.GetRequiredService<IHostEnvironment>();
 
-    public PhotinoWindow Window => Services.GetRequiredService<PhotinoWindow>();
-
     public IServiceProvider Services => _host.Services;
-
+    public PhotinoWindow Window => Services.GetRequiredService<PhotinoWindow>();
     public PhotinoWebViewManager WindowManager => Services.GetRequiredService<PhotinoWebViewManager>();
 
     public Stream HandleWebRequest(object? sender, string? scheme, string url, out string contentType)
@@ -20,6 +18,8 @@ public partial class PhotinoBlazorApp(IHost host)
     public void Run()
     {
         Initialize();
+        
+        _host.Start();
 
         if (string.IsNullOrWhiteSpace(Window.StartUrl))
         {
@@ -45,7 +45,6 @@ public partial class PhotinoBlazorApp(IHost host)
                 await windowManager.AddRootComponentAsync(component.ComponentType, component.Selector, component.Parameters);
             });
         }
-
     }
 
     private void ConfigureDefaults() => Window
