@@ -7,7 +7,7 @@ public partial class PhotinoBlazorApp(IHost host)
     private readonly IHost _host = host;
 
     public IHostEnvironment Environment => Services.GetRequiredService<IHostEnvironment>();
-
+    public IHostApplicationLifetime Lifetime => Services.GetRequiredService<IHostApplicationLifetime>();
     public IServiceProvider Services => _host.Services;
     public PhotinoWindow Window => Services.GetRequiredService<PhotinoWindow>();
     public PhotinoWebViewManager WindowManager => Services.GetRequiredService<PhotinoWebViewManager>();
@@ -18,8 +18,6 @@ public partial class PhotinoBlazorApp(IHost host)
     public void Run()
     {
         Initialize();
-        
-        _host.Start();
 
         if (string.IsNullOrWhiteSpace(Window.StartUrl))
         {
@@ -32,6 +30,9 @@ public partial class PhotinoBlazorApp(IHost host)
 
     internal void Initialize()
     {
+        _host.Start();
+        Lifetime.ApplicationStopped.Register(Window.Close);
+
         ConfigureDefaults();
         Window.RegisterCustomSchemeHandler(PhotinoWebViewManager.BlazorAppScheme, HandleWebRequest);
 
