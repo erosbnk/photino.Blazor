@@ -1,10 +1,15 @@
-﻿namespace Photino.Blazor.Utils;
+namespace Photino.Blazor.Utils;
 
 internal class SynchronousTaskScheduler : TaskScheduler
 {
     public override int MaximumConcurrencyLevel
     {
         get { return 1; }
+    }
+
+    protected override IEnumerable<Task> GetScheduledTasks()
+    {
+        return [];
     }
 
     protected override void QueueTask(Task task)
@@ -15,10 +20,5 @@ internal class SynchronousTaskScheduler : TaskScheduler
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
     {
         return TryExecuteTask(task);
-    }
-
-    protected override IEnumerable<Task> GetScheduledTasks()
-    {
-        return [];
     }
 }

@@ -7,52 +7,6 @@ namespace Photino.Blazor;
 /// </summary>
 internal sealed class PhotinoBlazorAppEnvironment : IWebHostEnvironment
 {
-    /// <summary>
-    /// The environment name.
-    /// </summary>
-    public string EnvironmentName
-    {
-        get => _hostEnvironment.EnvironmentName;
-        set => _hostEnvironment.EnvironmentName = value;
-    }
-
-    /// <summary>
-    /// The application name.
-    /// </summary>
-    public string ApplicationName
-    {
-        get => _hostEnvironment.ApplicationName;
-        set => _hostEnvironment.ApplicationName = value;
-    }
-
-    /// <summary>
-    /// The content root path.
-    /// </summary>
-    public string ContentRootPath
-    {
-        get => _hostEnvironment.ContentRootPath;
-        set => _hostEnvironment.ContentRootPath = value;
-    }
-
-    /// <summary>
-    /// The content root file provider.
-    /// </summary>
-    public IFileProvider ContentRootFileProvider
-    {
-        get => _hostEnvironment.ContentRootFileProvider;
-        set => _hostEnvironment.ContentRootFileProvider = value;
-    }
-
-    /// <summary>
-    /// The web root path.
-    /// </summary>
-    public string WebRootPath { get; set; }
-
-    /// <summary>
-    /// The web root file provider.
-    /// </summary>
-    public IFileProvider WebRootFileProvider { get; set; }
-
     private readonly IHostEnvironment _hostEnvironment;
 
     /// <summary>
@@ -84,4 +38,50 @@ internal sealed class PhotinoBlazorAppEnvironment : IWebHostEnvironment
 
         WebRootFileProvider = new PhysicalFileProvider(WebRootPath);
     }
+
+    /// <summary>
+    /// The application name.
+    /// </summary>
+    public string ApplicationName
+    {
+        get => _hostEnvironment.ApplicationName;
+        set => _hostEnvironment.ApplicationName = value;
+    }
+
+    /// <summary>
+    /// The content root file provider.
+    /// </summary>
+    public IFileProvider ContentRootFileProvider
+    {
+        get => _hostEnvironment.ContentRootFileProvider;
+        set => _hostEnvironment.ContentRootFileProvider = value;
+    }
+
+    /// <summary>
+    /// The content root path.
+    /// </summary>
+    public string ContentRootPath
+    {
+        get => _hostEnvironment.ContentRootPath;
+        set => _hostEnvironment.ContentRootPath = value;
+    }
+
+    /// <summary>
+    /// The environment name.
+    /// </summary>
+    public string EnvironmentName
+    {
+        get => _hostEnvironment.EnvironmentName;
+        set => _hostEnvironment.EnvironmentName = value;
+    }
+
+    /// <summary>
+    /// The web root file provider.
+    /// </summary>
+    public IFileProvider WebRootFileProvider { get; set; }
+
+    /// <summary>
+    /// The web root path.
+    /// </summary>
+    public string WebRootPath { get; set; }
 }

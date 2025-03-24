@@ -14,9 +14,6 @@ namespace Photino.Blazor;
 
 public class PhotinoWebViewManager : WebViewManager
 {
-    private readonly PhotinoWindow _window;
-    private readonly Channel<string> _channel;
-
     // On Windows, we can't use a custom scheme to host the initial HTML,
     // because webview2 won't let you do top-level navigation to such a URL.
     // On Linux/Mac, we must use a custom scheme, because their webviews
@@ -24,8 +21,11 @@ public class PhotinoWebViewManager : WebViewManager
     public static readonly string BlazorAppScheme = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
         ? "http"
         : "app";
-
+    
     public static readonly string AppBaseUri = $"{BlazorAppScheme}://localhost/";
+
+    private readonly Channel<string> _channel;
+    private readonly PhotinoWindow _window;
 
     public PhotinoWebViewManager(PhotinoWindow window, IServiceProvider provider, Dispatcher dispatcher,
         IFileProvider fileProvider, JSComponentConfigurationStore jsComponents, IOptions<PhotinoBlazorAppConfiguration> config)
@@ -47,7 +47,7 @@ public class PhotinoWebViewManager : WebViewManager
                 var messageOriginUrl = new Uri(AppBaseUri);
 
                 MessageReceived(messageOriginUrl, (string)message!);
-            }, 
+            },
             message, CancellationToken.None, TaskCreationOptions.DenyChildAttach, sts);
         };
 
@@ -77,6 +77,19 @@ public class PhotinoWebViewManager : WebViewManager
         }
     }
 
+    protected override ValueTask DisposeAsyncCore()
+    {
+        //complete channel
+        try { _channel.Writer.Complete(); }
+        catch
+        {
+            // This exception can be ignored.
+        }
+
+        //continue disposing
+        return base.DisposeAsyncCore();
+    }
+
     protected override void NavigateCore(Uri absoluteUri)
     {
         _window.Load(absoluteUri);
@@ -99,21 +112,9 @@ public class PhotinoWebViewManager : WebViewManager
                 await _window.SendWebMessageAsync(message);
             }
         }
-        catch (ChannelClosedException) 
+        catch (ChannelClosedException)
         {
             // This exception can be ignored.
         }
-    }
-
-    protected override ValueTask DisposeAsyncCore()
-    {
-        //complete channel
-        try { _channel.Writer.Complete(); } catch 
-        {
-            // This exception can be ignored.
-        }
-
-        //continue disposing
-        return base.DisposeAsyncCore();
     }
 }

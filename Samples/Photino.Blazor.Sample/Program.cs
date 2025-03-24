@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Web;
 using Photino.Blazor.Sample.Components;
 using System;
 
@@ -10,7 +11,7 @@ internal static class Program
     {
         var builder = PhotinoBlazorAppBuilder.CreateDefault(args);
         builder.RootComponents.Add<App>("#app");
-        builder.RootComponents.Add<App>("head::after");
+        builder.RootComponents.Add<HeadOutlet>("head::after");
 
         var app = builder.Build();
 

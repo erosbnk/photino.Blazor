@@ -30,11 +30,8 @@ internal class PhotinoSynchronizationContext : SynchronizationContext
 
     private readonly MethodInfo _invokeMethodInfo;
     private readonly State _state;
-    private readonly PhotinoWindow _window;
-
-#pragma warning disable IDE0052
     private readonly int _uiThreadId;
-#pragma warning restore IDE0052
+    private readonly PhotinoWindow _window;
 
     public PhotinoSynchronizationContext(PhotinoWindow window) : this(window, new State())
     {
@@ -258,7 +255,7 @@ internal class PhotinoSynchronizationContext : SynchronizationContext
     {
         // Anything run on the sync context should actually be dispatched as far as Photino
         // is concerned, so that it's safe to interact with the native window/WebView.
-        _invokeMethodInfo.Invoke(_window, new Action[] { () =>
+        _invokeMethodInfo.Invoke(_window, [() =>
         {
             var original = Current;
             try
@@ -274,7 +271,7 @@ internal class PhotinoSynchronizationContext : SynchronizationContext
 
                 completion?.SetResult(null);
             }
-        }});
+        }]);
     }
 
     // Similar to Post, but it can runs the work item synchronously if the context is not busy.

@@ -8,21 +8,6 @@ namespace Photino.Blazor;
 public readonly struct PhotinoRootComponent
 {
     /// <summary>
-    /// Gets the component type.
-    /// </summary>
-    public Type ComponentType { get; }
-
-    /// <summary>
-    /// Gets the DOM element selector.
-    /// </summary>
-    public string Selector { get; }
-
-    /// <summary>
-    /// Gets the parameters to pass to the root component.
-    /// </summary>
-    public ParameterView Parameters { get; }
-
-    /// <summary>
     /// Creates a new instance of <see cref="PhotinoRootComponent"/> with the provided <paramref name="componentType"/>
     /// and <paramref name="selector"/>.
     /// </summary>
@@ -57,4 +42,19 @@ public readonly struct PhotinoRootComponent
     {
         Parameters = parameters;
     }
+
+    /// <summary>
+    /// Gets the component type.
+    /// </summary>
+    public Type ComponentType { get; }
+
+    /// <summary>
+    /// Gets the parameters to pass to the root component.
+    /// </summary>
+    public ParameterView Parameters { get; }
+
+    /// <summary>
+    /// Gets the DOM element selector.
+    /// </summary>
+    public string Selector { get; }
 }
