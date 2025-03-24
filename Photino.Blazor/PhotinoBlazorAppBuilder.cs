@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.FileProviders;
 using Photino.NET;
 
 namespace Photino.Blazor;
@@ -63,7 +61,10 @@ public sealed class PhotinoBlazorAppBuilder
     /// <returns>A <see cref="BlazorDesktopHost"/> object.</returns>
     public PhotinoBlazorApp Build()
     {
-        return new(_builder.Build());
+        var app = new PhotinoBlazorApp(_builder.Build());
+        app.Initialize();
+
+        return app;
     }
 
     private static HostApplicationBuilder InitializeHostApplicationBuilder(string[]? args)

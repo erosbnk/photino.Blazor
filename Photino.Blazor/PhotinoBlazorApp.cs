@@ -17,8 +17,6 @@ public partial class PhotinoBlazorApp(IHost host)
 
     public void Run()
     {
-        Initialize();
-
         if (string.IsNullOrWhiteSpace(Window.StartUrl))
         {
             Window.StartUrl = "/";
