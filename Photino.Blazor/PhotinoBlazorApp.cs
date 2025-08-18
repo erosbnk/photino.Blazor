@@ -1,60 +1,64 @@
-using Microsoft.Extensions.DependencyInjection;
 using Photino.NET;
-using System;
-using System.IO;
 
-namespace Photino.Blazor
+namespace Photino.Blazor;
+
+public partial class PhotinoBlazorApp(IHost host)
 {
-    public class PhotinoBlazorApp
+    internal IHost Host { get; } = host;
+
+    public IHostEnvironment Environment => Services.GetRequiredService<IHostEnvironment>();
+    public IHostApplicationLifetime Lifetime => Services.GetRequiredService<IHostApplicationLifetime>();
+    public IServiceProvider Services => Host.Services;
+    public PhotinoWindow Window => Services.GetRequiredService<PhotinoWindow>();
+    public PhotinoWebViewManager WindowManager => Services.GetRequiredService<PhotinoWebViewManager>();
+
+    private void ConfigureDefaults() => Window
+        .SetTitle("Photino Blazor App")
+        .SetUseOsDefaultSize(false)
+        .SetUseOsDefaultLocation(false)
+        .SetWidth(1000)
+        .SetHeight(900)
+        .SetLeft(450)
+        .SetTop(100);
+
+    private bool WindowClosingHandler(object sender, EventArgs e)
     {
-        /// <summary>
-        /// Gets configuration for the service provider.
-        /// </summary>
-        public IServiceProvider Services { get; private set; }
+        Lifetime.StopApplication();
+        return false;
+    }
 
-        /// <summary>
-        /// Gets configuration for the root components in the window.
-        /// </summary>
-        public BlazorWindowRootComponents RootComponents { get; private set; }
+    internal void Initialize()
+    {
+        Host.Start();
+        Lifetime.ApplicationStopped.Register(Window.Close);
 
-        internal void Initialize(IServiceProvider services, RootComponentList rootComponents)
+        ConfigureDefaults();
+        Window.RegisterCustomSchemeHandler(PhotinoWebViewManager.BlazorAppScheme, HandleWebRequest);
+        Window.RegisterWindowClosingHandler(WindowClosingHandler);
+
+        var windowManager = Services.GetRequiredService<PhotinoWebViewManager>();
+        var rootComponents = Services.GetRequiredService<PhotinoRootComponentsList>();
+
+        foreach (var component in rootComponents)
         {
-            Services = services;
-            RootComponents = Services.GetService<BlazorWindowRootComponents>();
-            MainWindow = Services.GetService<PhotinoWindow>();
-            WindowManager = Services.GetService<PhotinoWebViewManager>();
-
-            MainWindow
-                .SetTitle("Photino.Blazor App")
-                .SetUseOsDefaultSize(false)
-                .SetUseOsDefaultLocation(false)
-                .SetWidth(1000)
-                .SetHeight(900)
-                .SetLeft(450)
-                .SetTop(100);
-
-            MainWindow.RegisterCustomSchemeHandler(PhotinoWebViewManager.BlazorAppScheme, HandleWebRequest);
-
-            foreach (var component in rootComponents)
+            _ = windowManager.Dispatcher.InvokeAsync(async () =>
             {
-                RootComponents.Add(component.Item1, component.Item2);
-            }
+                await windowManager.AddRootComponentAsync(component.ComponentType, component.Selector, component.Parameters);
+            });
         }
+    }
 
-        public PhotinoWindow MainWindow { get; private set; }
+    public Stream HandleWebRequest(object? sender, string? scheme, string url, out string contentType)
+        => WindowManager.HandleWebRequest(sender, scheme, url, out contentType!)!;
 
-        public PhotinoWebViewManager WindowManager { get; private set; }
-
-        public void Run()
+    public void Run()
+    {
+        if (string.IsNullOrWhiteSpace(Window.StartUrl))
         {
-            if (string.IsNullOrWhiteSpace(MainWindow.StartUrl))
-                MainWindow.StartUrl = "/";
-
-            WindowManager.Navigate(MainWindow.StartUrl);
-            MainWindow.WaitForClose();
+            Window.StartUrl = "/";
         }
 
-        public Stream HandleWebRequest(object sender, string scheme, string url, out string contentType)
-                => WindowManager.HandleWebRequest(sender, scheme, url, out contentType!)!;
+        WindowManager.Navigate(Window.StartUrl);
+        Window.WaitForClose();
     }
 }

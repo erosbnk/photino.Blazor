@@ -1,36 +1,28 @@
-﻿using System;
-using System.Net.Http;
-using Microsoft.Extensions.DependencyInjection;
+using HelloWorld.Components;
 using Photino.Blazor;
+using System;
 
-namespace HelloWorld
+namespace HelloWorld;
+
+internal static class Program
 {
-    class Program
+    [STAThread]
+    private static void Main(string[] args)
     {
-        [STAThread]
-        static void Main(string[] args)
+        var builder = PhotinoBlazorAppBuilder.CreateDefault(args);
+        builder.RootComponents.Add<App>("#app");
+        builder.RootComponents.Add<App>("head::after");
+
+        var app = builder.Build();
+
+        app.Window.SetIconFile("favicon.ico")
+                  .SetTitle("Photino Blazor Sample");
+
+        AppDomain.CurrentDomain.UnhandledException += (sender, error) =>
         {
-            var appBuilder = PhotinoBlazorAppBuilder.CreateDefault(args);
-            appBuilder.Services
-                .AddLogging();
+            app.Window.ShowMessage("Fatal exception", error.ExceptionObject.ToString());
+        };
 
-            // register root component
-            appBuilder.RootComponents.Add<App>("app");
-
-            var app = appBuilder.Build();
-
-            // customize window
-            app.MainWindow
-                .SetIconFile("favicon.ico")
-                .SetTitle("Photino Hello World");
-
-            AppDomain.CurrentDomain.UnhandledException += (sender, error) =>
-            {
-                app.MainWindow.ShowMessage("Fatal exception", error.ExceptionObject.ToString());
-            };
-
-            app.Run();
-        }
-
+        app.Run();
     }
 }

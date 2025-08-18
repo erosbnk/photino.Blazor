@@ -1,37 +1,27 @@
-﻿using System;
-using System.Net.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Photino.Blazor;
+using Photino.Blazor.NativeAOT.Components;
+using System;
 
-namespace Photino.Blazor.NativeAOT
+namespace Photino.Blazor.NativeAOT;
+
+internal static class Program
 {
-    class Program
+    [STAThread]
+    private static void Main(string[] args)
     {
-        [STAThread]
-        static void Main(string[] args)
+        var builder = PhotinoBlazorAppBuilder.CreateDefault(args);
+        builder.RootComponents.Add<App>("app");
+        builder.RootComponents.Add<App>("head::after");
+
+        var app = builder.Build();
+
+        app.Window.SetIconFile("favicon.ico")
+                  .SetTitle("Photino Blazor Sample");
+
+        AppDomain.CurrentDomain.UnhandledException += (sender, error) =>
         {
-            var appBuilder = PhotinoBlazorAppBuilder.CreateDefault(args);
+            app.Window.ShowMessage("Fatal exception", error.ExceptionObject.ToString());
+        };
 
-            appBuilder.Services
-                .AddLogging();
-
-            // register root component and selector
-            appBuilder.RootComponents.Add<App>("app");
-
-            var app = appBuilder.Build();
-
-            // customize window
-            app.MainWindow
-                .SetIconFile("favicon.ico")
-                .SetTitle("Photino Blazor Sample");
-
-            AppDomain.CurrentDomain.UnhandledException += (sender, error) =>
-            {
-                app.MainWindow.ShowMessage("Fatal exception", error.ExceptionObject.ToString());
-            };
-
-            app.Run();
-
-        }
+        app.Run();
     }
 }

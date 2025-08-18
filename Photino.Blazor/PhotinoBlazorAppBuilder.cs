@@ -1,86 +1,125 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+using Photino.NET;
 
-namespace Photino.Blazor
+namespace Photino.Blazor;
+
+public sealed class PhotinoBlazorAppBuilder
 {
-    public class PhotinoBlazorAppBuilder
+    private readonly HostApplicationBuilder _builder;
+
+    private PhotinoBlazorAppBuilder(string[]? args)
     {
-        internal PhotinoBlazorAppBuilder()
-        {
-            RootComponents = new RootComponentList();
-            Services = new ServiceCollection();
-        }
+        _builder = InitializeHostApplicationBuilder(args);
 
-        public static PhotinoBlazorAppBuilder CreateDefault(string[] args = default)
-        {
-            return CreateDefault(null, args);
-        }
+        InitializeDefaultServices();
 
-        public static PhotinoBlazorAppBuilder CreateDefault(IFileProvider fileProvider, string[] args = default)
-        {
-            // We don't use the args for anything right now, but we want to accept them
-            // here so that it shows up this way in the project templates.
-            // var jsRuntime = DefaultWebAssemblyJSRuntime.Instance;
-            var builder = new PhotinoBlazorAppBuilder();
-            builder.Services.AddBlazorDesktop(fileProvider);
-
-            // Right now we don't have conventions or behaviors that are specific to this method
-            // however, making this the default for the template allows us to add things like that
-            // in the future, while giving `new BlazorDesktopHostBuilder` as an opt-out of opinionated
-            // settings.
-            return builder;
-        }
-
-        public RootComponentList RootComponents { get; }
-
-        public IServiceCollection Services { get; }
-
-        public PhotinoBlazorApp Build(Action<IServiceProvider> serviceProviderOptions = null)
-        {
-            // register root components with DI container
-            // Services.AddSingleton(RootComponents);
-
-            var sp = Services.BuildServiceProvider();
-            var app = sp.GetRequiredService<PhotinoBlazorApp>();
-
-            serviceProviderOptions?.Invoke(sp);
-
-            app.Initialize(sp, RootComponents);
-            return app;
-        }
+        RootComponents = InitializeRootComponents();
+        Environment = InitializeEnvironment();
     }
 
-    public class RootComponentList : IEnumerable<(Type, string)>
+    /// <summary>
+    /// Gets an <see cref="ConfigurationManager"/> that can be used to customize the application's
+    /// configuration sources and read configuration attributes.
+    /// </summary>
+    public ConfigurationManager Configuration => _builder.Configuration;
+
+    /// <summary>
+    /// Gets information about the app's host environment.
+    /// </summary>
+    public IWebHostEnvironment Environment { get; }
+
+    /// <summary>
+    /// Gets the logging builder for configuring logging services.
+    /// </summary>
+    public ILoggingBuilder Logging => _builder.Logging;
+
+    /// <summary>
+    /// Gets the collection of root component mappings configured for the application.
+    /// </summary>
+    public PhotinoRootComponentsList RootComponents { get; }
+
+    /// <summary>
+    /// Gets the service collection.
+    /// </summary>
+    public IServiceCollection Services => _builder.Services;
+
+    /// <summary>
+    /// Creates an instance of <see cref="BlazorDesktopHostBuilder"/> using the most common
+    /// conventions and settings.
+    /// </summary>
+    /// <param name="args">The arguments passed to the application's main method.</param>
+    /// <returns>A <see cref="BlazorDesktopHostBuilder"/>.</returns>
+    public static PhotinoBlazorAppBuilder CreateDefault(string[]? args = default)
     {
-        private readonly List<(Type componentType, string domElementSelector)> components = new List<(Type componentType, string domElementSelector)>();
+        return new(args);
+    }
 
-        public void Add<TComponent>(string selector) where TComponent : IComponent
+    /// <summary>
+    /// Builds a <see cref="BlazorDesktopHost"/> instance based on the configuration of this builder.
+    /// </summary>
+    /// <returns>A <see cref="BlazorDesktopHost"/> object.</returns>
+    public PhotinoBlazorApp Build()
+    {
+        var app = new PhotinoBlazorApp(_builder.Build());
+        app.Initialize();
+
+        return app;
+    }
+
+    private static HostApplicationBuilder InitializeHostApplicationBuilder(string[]? args)
+    {
+        var configuration = new ConfigurationManager();
+
+        configuration.AddEnvironmentVariables("ASPNETCORE_");
+
+        return new(new HostApplicationBuilderSettings
         {
-            components.Add((typeof(TComponent), selector));
-        }
+            Args = args,
+            Configuration = configuration
+        });
+    }
 
-        public void Add(Type componentType, string selector)
+    private void InitializeDefaultServices()
+    {
+        Services.AddOptions<PhotinoBlazorAppConfiguration>().Configure(opts =>
         {
-            if (!typeof(IComponent).IsAssignableFrom(componentType))
-            {
-                throw new ArgumentException("The component type must implement IComponent interface.");
-            }
+            opts.AppBaseUri = new Uri(PhotinoWebViewManager.AppBaseUri);
+            opts.HostPage = "index.html";
+        });
 
-            components.Add((componentType, selector));
-        }
-
-        public IEnumerator<(Type, string)> GetEnumerator()
+        Services.AddScoped(sp =>
         {
-            return components.GetEnumerator();
-        }
+            var handler = sp.GetRequiredService<PhotinoHttpHandler>();
+            return new HttpClient(handler) { BaseAddress = new Uri(PhotinoWebViewManager.AppBaseUri) };
+        });
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return components.GetEnumerator();
-        }
+        Services.AddSingleton<Dispatcher, PhotinoDispatcher>();
+        Services.AddSingleton<JSComponentConfigurationStore>();
+        Services.AddSingleton<PhotinoBlazorApp>();
+        Services.AddSingleton<PhotinoHttpHandler>();
+        Services.AddSingleton<PhotinoSynchronizationContext>();
+        Services.AddSingleton<PhotinoWebViewManager>();
+        Services.AddSingleton(new PhotinoWindow());
+        Services.AddBlazorWebView();
+    }
+
+    private PhotinoBlazorAppEnvironment InitializeEnvironment()
+    {
+        var hostEnvironment = new PhotinoBlazorAppEnvironment(_builder.Environment, Configuration);
+
+        Services.AddSingleton<IWebHostEnvironment>(hostEnvironment);
+        Services.AddSingleton(hostEnvironment.WebRootFileProvider);
+
+        return hostEnvironment;
+    }
+
+    private PhotinoRootComponentsList InitializeRootComponents()
+    {
+        var rootComponents = new PhotinoRootComponentsList();
+
+        Services.AddSingleton(rootComponents);
+
+        return rootComponents;
     }
 }
