@@ -34,7 +34,7 @@ internal class Program
         builder.Services.AddLogging();
 
         // register root component and selector
-        builder.RootComponents.Add(windowCreationArgs.RootComponentType, "app");
+        builder.RootComponents.Add(windowCreationArgs.RootComponentType, "#app");
 
         var app = builder.Build();
 
@@ -49,6 +49,7 @@ internal class Program
                     CloseAllWindows();
                     return false;
                 })
+                .SetNotificationsEnabled(false)
         );
 
         AppDomain.CurrentDomain.UnhandledException += (sender, error) =>
