@@ -9,7 +9,7 @@ Hello Photino Community! We have a new poll question, regarding where and how yo
 Photino is a lightweight open-source framework for building native,  
 cross-platform desktop applications with Web UI technology.
 
-Photino.Blazor builds on <span>Photino.</span>NET to add Blazor capabilities.
+ViewEngine builds on <span>Photino.</span>NET to add Blazor capabilities.
 
 Photino uses the OSs built-in WebKit-based browser control for Windows, macOS and Linux.
 Photino is the lightest cross-platform framework. Compared to Electron, a Photino app is up to 110 times smaller! And it uses far less system memory too!
@@ -44,14 +44,14 @@ static void Main(string[] args)
 }
 ```
 
-## Photino.Blazor
+## ViewEngine
 
 This project represents Blazor functionality on top of <span>Photino.</span>NET (the .NET 5 wrapper for the Photino.Native project), which makes it available for all operating systems (Windows, macOS, Linux).
 This Blazor sample projects are contained in this repo and are not included withi the non-Blazor samples.
 
-If you made changes to the Photino.Native or <span>Photino.</span>NET projects, or added new features to them, you will likely need this repo to expose the new functionality to the Photino.Blazor wrapper.
+If you made changes to the Photino.Native or <span>Photino.</span>NET projects, or added new features to them, you will likely need this repo to expose the new functionality to the ViewEngine wrapper.
 In all other cases, you can just grab the nuget package for your projects:
-https://www.nuget.org/packages/Photino.Blazor
+https://www.nuget.org/packages/ViewEngine
 
 ## How to build this repo
 

@@ -1,0 +1,23 @@
+<div>
+    <h1 class="cursive">@message!</h1>
+    <div class="divider">
+        <p>Current count: @currentCount</p>
+    </div>
+    <button class="border-4 border-gray-400" @onclick="IncrementCount">Click me</button>
+</div>
+
+@code
+{
+    string message;
+    private int currentCount = 0;
+    
+    protected override void OnInitialized()
+    {
+        message = "Hello ViewEngine!";
+    }
+
+    void IncrementCount(object e)
+    {
+        currentCount++;
+    }
+}

@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ApplicationIcon>favicon.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\ViewEngine\ViewEngine.csproj" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<Content Update="wwwroot\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="favicon.ico">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<Target Name="TailwindCSS" BeforeTargets="Compile">
+		<Exec Command="npx @tailwindcss/cli -i ./wwwroot/imports.css -o ./wwwroot/index.css" />
+	</Target>
+
+</Project>

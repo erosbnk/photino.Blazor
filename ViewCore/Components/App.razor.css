@@ -1,0 +1,3 @@
+/* CSS isolation do Blazor (scoped ao App.razor).
+   Use CSS puro aqui. Classes de componente com @apply e utilitários do Tailwind
+   ficam no wwwroot/imports.css (pipeline global do Tailwind). */

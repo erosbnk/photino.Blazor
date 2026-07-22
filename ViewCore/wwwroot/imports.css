@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* Faz o Tailwind escanear a marcação dos componentes para gerar as classes usadas no class="..." */
+@source "../**/*.razor";
+
+@layer components {
+  .cursive {
+    @apply italic text-lg;
+  }
+
+  .divider {
+    @apply border-2 border-gray-300 rounded-lg p-4;
+  }
+}
